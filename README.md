@@ -23,12 +23,14 @@ complete text.
 Maintainers
 -----------
 
-Seeking maintainers
+Seeking maintainers.
 
 Credits
 -------
 
-This module is based on the Drupal module Flag-7.x-3.x
+Ported to Backdrop CMS by John Romine (https://github.com/jromine/).
+
+This module is based on the Drupal module Flag-7.x-3.x.
 
 Project page: http://drupal.org/project/flag.
 
