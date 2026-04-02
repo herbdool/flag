@@ -55,6 +55,8 @@ function flag_autoload_info() {
     'flag_handler_relationship_counts'           => 'views/flag_handler_relationships.inc',
     'flag_handler_relationship_user_content'     => 'views/flag_handler_relationships.inc',
     'flag_handler_field_ops'                     => 'views/flag_handler_field_ops.inc',
+    // @todo this is a not really anything yet, needs to be fleshed out.
+    'flag_handler_field_link'                    => 'views/flag_handler_field_link.inc',
     'flag_plugin_argument_validate_flaggability' => 'views/flag_plugin_argument_validate_flaggability.inc',
     'flag_handler_argument_entity_id'            => 'views/flag_handler_argument_entity_id.inc',
     'flag_handler_field_flagged'                 => 'views/flag_handler_field_flagged.inc',
