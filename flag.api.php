@@ -380,15 +380,3 @@ function hook_flag_javascript_info_alter(&$info, $flag) {
     ));
   }
 }
-
-/**
- * Alter a flag object that is being prepared for exporting.
- *
- * @param $flag
- *  The flag object.
- *
- * @see flag_export_flags()
- */
-function hook_flag_export_alter($flag) {
-
-}

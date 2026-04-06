@@ -242,7 +242,7 @@ class flag_flag {
   /**
    * Validates that the current flag's name is valid.
    *
-   * @return
+   * @return array
    *   A list of errors encountered while validating this flag's name.
    */
   function validate_name() {

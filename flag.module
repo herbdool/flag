@@ -44,8 +44,6 @@ function flag_autoload_info() {
     'FlagCookieStorage'                          => 'includes/flag.cookie_storage.inc',
     'FlagGlobalCookieStorage'                    => 'includes/flag.cookie_storage.inc',
     'FlagNonGlobalCookieStorage'                 => 'includes/flag.cookie_storage.inc',
-    'FlagUpdate_2'                               => 'includes/flag.export.inc',
-    'FlagUpdate_3'                               => 'includes/flag.export.inc',
     'FlagRulesDataWrapper'                       => 'flag.rules.inc',
     'FlagRulesUIClass'                           => 'flag.rules.inc',
 
@@ -229,24 +227,6 @@ function flag_menu() {
     'type' => MENU_LOCAL_ACTION,
     'weight' => 1,
   );
-  $items[FLAG_ADMIN_PATH . '/import'] = array(
-    'title' => 'Import',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('flag_import_form'),
-    'access arguments' => array('use flag import'),
-    'file' => 'includes/flag.export.inc',
-    'type' => MENU_LOCAL_ACTION,
-    'weight' => 2,
-  );
-  $items[FLAG_ADMIN_PATH . '/export'] = array(
-    'title' => 'Export',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('flag_export_form'),
-    'access arguments' => array('administer flags'),
-    'file' => 'includes/flag.export.inc',
-    'type' => MENU_LOCAL_ACTION,
-    'weight' => 3,
-  );
 
   $items[FLAG_ADMIN_PATH . '/manage/%flag'] = array(
     // Allow for disabled flags.
@@ -268,15 +248,6 @@ function flag_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items[FLAG_ADMIN_PATH . '/manage/%flag/export'] = array(
-    'title' => 'Export',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('flag_export_form', FLAG_ADMIN_PATH_START + 1),
-    'access arguments' => array('administer flags'),
-    'file' => 'includes/flag.export.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 20,
-  );
   $items[FLAG_ADMIN_PATH . '/manage/%flag/delete'] = array(
     'title' => 'Delete flag',
     'page callback' => 'backdrop_get_form',
@@ -284,16 +255,6 @@ function flag_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('administer flags'),
     'file' => 'flag.admin.inc',
-    'type' => MENU_CALLBACK,
-  );
-  $items[FLAG_ADMIN_PATH . '/manage/%flag/update'] = array(
-    // Allow for disabled flags.
-    'load arguments' => array(TRUE),
-    'title' => 'Update',
-    'page callback' => 'flag_update_page',
-    'page arguments' => array(FLAG_ADMIN_PATH_START + 1),
-    'access arguments' => array('administer flags'),
-    'file' => 'includes/flag.export.inc',
     'type' => MENU_CALLBACK,
   );
 
