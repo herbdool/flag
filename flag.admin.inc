@@ -81,8 +81,17 @@ function theme_flag_admin_listing($variables) {
       'flags_fields' => array('title' => t('manage fields'), 'href' => $flag->admin_path('fields')),
       // 'flags_display' => array('title' => t('manage display'), 'href' => $flag->admin_path('display')),
       'flags_delete' => array('title' => t('delete'), 'href' => $flag->admin_path('delete')),
-      'flags_export' => array('title' => t('export'), 'href' => $flag->admin_path('export')),
     );
+    if (module_exists('config') && user_access('synchronize configuration')) {
+      $ops['flags_export'] = array(
+        'title' => t('export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Flags',
+          'name' => 'flag.flag.' . $flag->name,
+        ),
+      );
+    }
     if (!module_exists('field_ui')) {
       unset($ops['flags_fields']);
       // unset($ops['flags_display']);
