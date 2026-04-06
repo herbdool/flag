@@ -2057,7 +2057,7 @@ function flag_get_user_flags($entity_type, $entity_id = NULL, $uid = NULL, $sid 
  * @param $flag_name
  *   (optional) The name of a flag if wanting a list specific to a single flag.
  *
- * @return
+ * @return array
  *   A nested array of flagging records (i.e. rows from the {flagging} table,
  *   rather than complete Flagging entities). The structure depends on the
  *   presence of the $flag_name parameter:
@@ -2119,7 +2119,7 @@ function flag_get_entity_flags($entity_type, $entity_id, $flag_name = NULL) {
  *    result of a flagging action.
  *  - errors: An array of error messages.
  *
- * @return
+ * @return string
  *   The HTML for the themed flag link.
  */
 function flag_create_link($flag_name, $entity_id, $variables = array()) {
@@ -2217,7 +2217,7 @@ function flag_reset_flag($flag, $entity_id = NULL) {
 /**
  * Return an array of link types provided by modules.
  *
- * @return
+ * @return array
  *  An array of link types as defined by hook_flag_link_type_info(). These are
  *  keyed by the type name, and each value is an array of properties. In
  *  addition to those defined in hook_flag_link_type_info(), the following
@@ -2292,7 +2292,7 @@ function flag_check_token($token, $entity_id) {
  *   (optional) Determines whether a session should be created if it doesn't
  *   exist yet. Defaults to TRUE.
  *
- * @return
+ * @return int
  *   The session ID, if a session was created. If not, the return value is 0.
  *
  * @see flag_get_sid()
@@ -2336,7 +2336,7 @@ function flag_set_sid($uid = NULL, $create = TRUE) {
  *   (optional) Determines whether a session should be created if it doesn't
  *   exist yet. Defaults to FALSE.
  *
- * @return
+ * @return int
  *   The session ID, if the session exists. If not, the return value is 0.
  *
  * @see flag_set_sid()
@@ -2448,15 +2448,6 @@ function flag_features_api() {
   );
 }
 
-/**
- * Implements hook_ctools_plugin_directory().
- */
-function flag_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools' && !empty($plugin)) {
-    return "plugins/$plugin";
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Entity Metadata callbacks
 
@@ -2517,7 +2508,8 @@ function flag_properties_get_flagging_users($entity, array $options, $name, $ent
  * @param $property_info
  *  The ifnromatin that represents the property we are providing a result for.
  *
- * @return an integer representing the user's sid field from the session_api table
+ * @return int
+ *   An integer representing the user's sid field from the session_api table
  *
  * @ingroup callbacks
  */
