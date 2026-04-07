@@ -419,10 +419,31 @@ function flag_help($path, $arg) {
 }
 
 /**
- * Implements hook_init().
+ * Implements hook_action_info().
  */
-function flag_init() {
-  module_load_include('inc', 'flag', 'includes/flag.actions');
+function flag_action_info() {
+  $flags = flag_get_flags();
+  $index = 0;
+  foreach ($flags as $flag) {
+    $info["flag_flag_{$flag->name}_{$flag->entity_type}_action"] = array(
+      'label' => $flag->get_label('flag_short'),
+      'type' => $flag->entity_type,
+      'flag_name' => $flag->name,
+      'callback' => 'flag_flag_entity_action',
+      'file' => 'flag.actions.inc',
+      'weight' => 1 + $index,
+    );
+    $info["flag_unflag_{$flag->name}_{$flag->entity_type}_action"] = array(
+      'label' => $flag->get_label('flag_short'),
+      'type' => $flag->entity_type,
+      'flag_name' => $flag->name,
+      'callback' => 'flag_unflag_entity_action',
+      'file' => 'flag.actions.inc',
+      'weight' => 1 + $index,
+    );
+  }
+
+  return $info;
 }
 
 /**
