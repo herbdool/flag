@@ -426,7 +426,7 @@ function flag_action_info() {
   $index = 0;
   foreach ($flags as $flag) {
     $info["flag_flag_{$flag->name}_{$flag->entity_type}_action"] = array(
-      'label' => t('Flag "@label"', array('@label' => $flag->flag_short)),
+      'label' => $flag->get_label('flag_short'),
       'type' => $flag->entity_type,
       'flag_name' => $flag->name,
       'callback' => 'flag_flag_entity_action',
@@ -434,7 +434,7 @@ function flag_action_info() {
       'weight' => 1 + $index,
     );
     $info["flag_unflag_{$flag->name}_{$flag->entity_type}_action"] = array(
-      'label' => t('Unflag "@label"', array('@label' => $flag->unflag_short)),
+      'label' => $flag->get_label('flag_short'),
       'type' => $flag->entity_type,
       'flag_name' => $flag->name,
       'callback' => 'flag_unflag_entity_action',
