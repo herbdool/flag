@@ -157,6 +157,10 @@ class flag_flag {
       'link_type' => 'toggle',
       'show_in_links' => array('teaser', 'full'),
       'weight' => 0,
+      // Flood control settings.
+      'flood_control_active' => FALSE,
+      'flood_control_limit' => 0,
+      'flood_control_window' => 0,
     );
 
     // Merge in options from the current link type.
@@ -470,7 +474,7 @@ class flag_flag {
     // - At least one module says to grant access.
     // If no module specified either allow or deny, we fall back to the
     // default access check above.
-    $module_access = module_invoke_all('flag_access', $this, $entity_id, $action, $account);
+    $module_access = (array) module_invoke_all('flag_access', $this, $entity_id, $action, $account);
     if (in_array(FALSE, $module_access, TRUE)) {
       $access = FALSE;
     }
@@ -479,7 +483,38 @@ class flag_flag {
       $access = TRUE;
     }
 
+    // Deny access if flood control is active and the user has exceeded the
+    // limit. Only applies to the 'flag' action (not 'unflag').
+    if ($access && $action == 'flag' && !$this->flood_control_access($account)) {
+      $access = FALSE;
+    }
+
     return $access;
+  }
+
+  /**
+   * Checks whether the current user is allowed to flag based on flood control.
+   *
+   * @param User|null $account
+   *   (optional) The user account to check. Defaults to the current user.
+   *
+   * @return bool
+   *   TRUE if the user is allowed to flag, FALSE if flood control blocks it.
+   */
+  function flood_control_access($account = NULL) {
+    if (!isset($account)) {
+      $account = $GLOBALS['user'];
+    }
+    // Flood control is inactive, always allow.
+    if (empty($this->flood_control_active)) {
+      return TRUE;
+    }
+    // User can bypass flood control.
+    if (user_access('bypass flagging flood control', $account)) {
+      return TRUE;
+    }
+    $identifier = $account->uid . '-' . $this->name;
+    return flood_is_allowed('flag.flagging', $this->flood_control_limit, $this->flood_control_window, $identifier);
   }
 
   /**
@@ -804,6 +839,12 @@ class flag_flag {
     // Invoke Rules event.
     if (module_exists('rules')) {
       $this->invoke_rules_event('flag', $flagging, $entity_id, $account);
+    }
+
+    // Register flood event for this flagging.
+    if (!empty($this->flood_control_active)) {
+      $identifier = $account->uid . '-' . $this->name;
+      flood_register_event('flag.flagging', $this->flood_control_window, $identifier);
     }
   }
 

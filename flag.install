@@ -334,3 +334,26 @@ function flag_update_1003() {
   db_drop_table('flag');
   db_drop_table('flag_types');
 }
+
+/**
+ * Set default flood control settings on all flags.
+ *
+ * Flood control options are stored in the flag options.
+ * Existing flags already get the defaults from flag_flag::options(), so this
+ * update is a no-op for schema purposes; it exists to explicitly persist the
+ * defaults so that exported flag definitions include flood control settings.
+ */
+function flag_update_1004() {
+  foreach (flag_get_flags() as $flag) {
+    if (!isset($flag->flood_control_active)) {
+      $flag->flood_control_active = FALSE;
+    }
+    if (!isset($flag->flood_control_limit)) {
+      $flag->flood_control_limit = 0;
+    }
+    if (!isset($flag->flood_control_window)) {
+      $flag->flood_control_window = 0;
+    }
+    $flag->save();
+  }
+}
