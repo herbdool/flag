@@ -1551,6 +1551,13 @@ function template_preprocess_flag(&$variables) {
     unset($link['href']);
   }
 
+  // When flood control is active and the limit is exceeded, strip the href so
+  // the flag text remains visible as disabled text (a <span> instead of <a>),
+  // matching D10's render-blocking behaviour. Applies to both flag and unflag.
+  if (isset($link['href']) && !$flag->flood_control_access()) {
+    unset($link['href']);
+  }
+
   // Anonymous users always need the JavaScript to maintain their flag state.
   if ($user->uid == 0) {
     $link_type['uses standard js'] = TRUE;

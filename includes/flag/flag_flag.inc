@@ -483,12 +483,6 @@ class flag_flag {
       $access = TRUE;
     }
 
-    // Deny access if flood control is active and the user has exceeded the
-    // limit. Only applies to the 'flag' action (not 'unflag').
-    if ($access && $action == 'flag' && !$this->flood_control_access($account)) {
-      $access = FALSE;
-    }
-
     return $access;
   }
 

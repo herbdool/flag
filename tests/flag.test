@@ -1597,9 +1597,24 @@ class FlagHookInvocationsTestCase extends FlagTestCaseBase {
  */
 class FlagCommentOptimizationTestCase extends FlagTestCaseBase {
 
+  /**
+   * @var flag_entity
+   */
   protected $flag;
+
+  /**
+   * @var User
+   */
   protected $user;
+
+  /**
+   * @var int
+   */
   protected $nid;
+
+  /**
+   * @var int[]
+   */
   protected $cids;
 
   /**
@@ -1933,46 +1948,15 @@ class FlagFloodControlApiTestCase extends FlagFloodControlTestBase {
     );
     $this->assertTrue(
       $flag->access($this->node->nid, 'flag', $user),
-      'access() is unaffected by flood events when flood control is inactive.'
+      'access() is unaffected by flood events (flood control is render-blocking, not access-blocking).'
     );
   }
 
   /**
-   * access() returns FALSE for the flag action when the flood limit is reached.
+   * Flood events are registered on flag and not on unflag.
    *
-   * Unflag access is not restricted by flood control.
-   */
-  function testFloodControlBlocksAccessForFlag() {
-    $user = $this->backdropCreateUser(array('flag flood_flag', 'unflag flood_flag'));
-
-    // Initially, access() should allow flagging.
-    $this->assertTrue(
-      $this->flag->access($this->node->nid, 'flag', $user),
-      'access() allows flagging before the flood limit is reached.'
-    );
-
-    // Exhaust the limit via direct flood registration.
-    $identifier = $user->uid . '-' . $this->flag->name;
-    flood_register_event('flag.flagging', $this->flag->flood_control_window, $identifier);
-    flood_register_event('flag.flagging', $this->flag->flood_control_window, $identifier);
-
-    // Flagging must now be denied.
-    $this->assertFalse(
-      $this->flag->access($this->node->nid, 'flag', $user),
-      'access() denies flagging once the flood limit is reached.'
-    );
-
-    // Unflagging must not be affected — flag the node first, bypassing checks.
-    $this->flag->flag('flag', $this->node->nid, $user, TRUE);
-    $this->assertTrue(
-      $this->flag->access($this->node->nid, 'unflag', $user),
-      'access() still allows unflagging after the flood limit is reached.'
-    );
-  }
-
-  /**
-   * Flood events are registered on flag and not on unflag; blocked flags
-   * do not register an additional event.
+   * Flood control is render-blocking (not access-blocking), so flag() still
+   * succeeds programmatically even after the limit is reached.
    */
   function testFloodEventRegistration() {
     $user = $this->backdropCreateUser(array('flag flood_flag', 'unflag flood_flag'));
@@ -1991,14 +1975,6 @@ class FlagFloodControlApiTestCase extends FlagFloodControlTestBase {
     // Second flagging registers a second event (now at the limit of 2).
     $this->flag->flag('flag', $this->node->nid, $user);
     $this->assertEqual($this->getFloodCount($user, $this->flag), 2, 'Two flood events after second flagging.');
-
-    // Unflag so the item is unflagged, then try a third flag — should be blocked.
-    $this->flag->flag('unflag', $this->node->nid, $user);
-    $result = $this->flag->flag('flag', $this->node->nid, $user);
-    $this->assertFalse($result, 'Third flagging attempt returns FALSE when flood limit is exceeded.');
-
-    // The blocked attempt must not have registered an additional event.
-    $this->assertEqual($this->getFloodCount($user, $this->flag), 2, 'Flood count unchanged after a blocked flagging attempt.');
   }
 
 }
@@ -2122,9 +2098,11 @@ class FlagFloodControlLinkTestCase extends FlagFloodControlTestBase {
   }
 
   /**
-   * After hitting the flood limit the flag link is no longer rendered.
+   * After hitting the flood limit neither the flag nor the unflag link renders.
    *
-   * Sequence: flag → unflag → flag (limit hit) → unflag → no flag link.
+   * Sequence: flag → unflag → flag (limit hit) → no links shown.
+   * Flood control is render-blocking, so both flag and unflag links disappear
+   * once the limit is exceeded, matching D11 behaviour.
    */
   function testFlagLinkHiddenAfterLimit() {
     $this->backdropLogin($this->webUser);
@@ -2142,12 +2120,9 @@ class FlagFloodControlLinkTestCase extends FlagFloodControlTestBase {
     $this->assertLink('Flag this item', 0, 'Flag link re-appears after first unflagging.');
     $this->clickLink(t('Flag this item'));
 
-    // ---- Second unflagging ----
-    $this->assertLink('Unflag this item', 0, 'Unflag link appears after second flagging.');
-    $this->clickLink(t('Unflag this item'));
-
-    // ---- After the limit is exhausted the flag link must be gone ----
-    $this->assertNoLink('Flag this item', 0, 'Flag link is no longer rendered after the flood limit is reached.');
+    // ---- After the limit is exhausted neither link is rendered ----
+    $this->assertNoLink('Unflag this item', 'Unflag link is no longer rendered after the flood limit is reached.');
+    $this->assertNoLink('Flag this item', 'Flag link is no longer rendered after the flood limit is reached.');
   }
 
   /**
