@@ -304,9 +304,9 @@ function flag_admin_menu_map() {
 /**
  * Menu loader for '%flag' arguments.
  *
- * @param $flag_name
+ * @param string $flag_name
  *   The machine name of the flag.
- * @param $include_disabled
+ * @param bool $include_disabled
  *   (optional) Whether to return a disabled flag too. Normally only enabled
  *   flags are returned. Some menu items operate on disabled flags and in this
  *   case you need to turn on this switch by doing:
@@ -315,7 +315,7 @@ function flag_admin_menu_map() {
  *   @endcode
  *   in your hook_menu().
  *
- * @return
+ * @return flag_flag|false
  *   Either the flag object, or FALSE if none was found.
  */
 function flag_load($flag_name, $include_disabled = FALSE) {
@@ -337,6 +337,8 @@ function flag_load($flag_name, $include_disabled = FALSE) {
 
 /**
  * Menu title callback.
+ *
+ * @param flag_flag $flag
  */
 function _flag_menu_title($flag) {
   // The following conditional it to handle a D7 bug (@todo: link).
@@ -468,11 +470,11 @@ function flag_hook_info() {
 /**
  * Get a flag type definition.
  *
- * @param $entity_type
+ * @param string|null $entity_type
  *   (optional) The entity type to get the definition for, or NULL to return
  *   all flag types.
  *
- * @return
+ * @return array
  *   The flag type definition array.
  *
  * @see hook_flag_type_info()
@@ -504,7 +506,7 @@ function flag_fetch_definition($entity_type = NULL) {
 /**
  * Returns all flag types defined on the system.
  *
- * @return
+ * @return array
  *   An array of flag type names.
  */
 function flag_get_types() {
@@ -521,12 +523,12 @@ function flag_get_types() {
  * A flag handler is more commonly know as "a flag". A factory method usually
  * populates this empty flag with settings loaded from the database.
  *
- * @param $entity_type
+ * @param string $entity_type
  *  The entity type to create a flag handler for. This may be FALSE if the
  *  entity type property could not be found in the flag configuration data.
  *
- * @return
- *  A flag handler object. This may be the special class flag_broken is there is
+ * @return flag_flag
+ *  A flag handler object. This may be the special class flag_broken if there is
  *  a problem with the flag.
  */
 function flag_create_handler($entity_type) {
@@ -554,6 +556,11 @@ function flag_permission() {
     'use flag import' => array(
       'title' => t('Use flag importer'),
       'description' => t('Access the flag import functionality.'),
+      'restrict access' => TRUE,
+    ),
+    'bypass flagging flood control' => array(
+      'title' => t('Bypass the flagging flood control'),
+      'description' => t('Bypass the flagging flood control.'),
       'restrict access' => TRUE,
     ),
   );
@@ -1263,18 +1270,18 @@ function flag_field_attach_delete_bundle($entity_type, $bundle, $instances) {
 /**
  * Flags or unflags an item.
  *
- * @param $action
+ * @param string $action
  *   Either 'flag' or 'unflag'.
- * @param $flag_name
+ * @param string $flag_name
  *   The name of the flag to use.
- * @param $entity_id
+ * @param int $entity_id
  *   The ID of the item to flag or unflag.
- * @param $account
+ * @param User|null $account
  *   (optional) The user on whose behalf to flag. Omit for the current user.
- * @param permissions_check
+ * @param bool $permissions_check
  *   (optional) A boolean indicating whether to skip permissions.
  *
- * @return
+ * @return bool
  *   FALSE if some error occured (e.g., user has no permission, flag isn't
  *   applicable to the item, etc.), TRUE otherwise.
  */
@@ -1546,6 +1553,13 @@ function template_preprocess_flag(&$variables) {
     unset($link['href']);
   }
 
+  // When flood control is active and the limit is exceeded, strip the href so
+  // the flag text remains visible as disabled text (a <span> instead of <a>),
+  // matching D10's render-blocking behaviour. Applies to both flag and unflag.
+  if (isset($link['href']) && !$flag->flood_control_access()) {
+    unset($link['href']);
+  }
+
   // Anonymous users always need the JavaScript to maintain their flag state.
   if ($user->uid == 0) {
     $link_type['uses standard js'] = TRUE;
@@ -1649,12 +1663,12 @@ function _flag_link_type_descriptions() {
  * This is because this queries the {flagging} table, which only has its record
  * deleted at the very end of the unflagging process.
  *
- * @param $flag
+ * @param object $flag
  *   The flag.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type. For example, 'node'.
  *
- * @return
+ * @return array
  *   The flag count with the flag name and entity type as the array key.
  */
 function flag_get_entity_flag_counts($flag, $entity_type) {
@@ -1689,12 +1703,12 @@ function flag_get_entity_flag_counts($flag, $entity_type) {
  * This is because this queries the {flagging} table, which only has its record
  * deleted at the very end of the unflagging process.
  *
- * @param $flag
+ * @param object $flag
  *   The flag.
- * @param $user
+ * @param User $user
  *   The user object.
  *
- * @return
+ * @return array
  *   The flag count with the flag name and the uid as the array key.
  */
 function flag_get_user_flag_counts($flag, $user) {
@@ -1724,12 +1738,12 @@ function flag_get_user_flag_counts($flag, $user) {
  * implementation or from Rules), the count this returns takes into account the
  * the flagging or unflagging that is in the process of being performed.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type (usually 'node').
- * @param $entity_id
+ * @param int $entity_id
  *   The entity ID (usually the node ID).
  *
- * @return
+ * @return array
  *   The flag count with the flag names as array keys.
  */
 function flag_get_counts($entity_type, $entity_id) {
@@ -1784,10 +1798,10 @@ function flag_get_flag_counts($flag_name, $reset = FALSE) {
 /**
  * Load a single flag by name.
  *
- * @param $name
+ * @param string|null $name
  *   The flag name.
  *
- * @return
+ * @return object
  *  The flag object, or FALSE if no matching flag was found.
  */
 function flag_get_flag($name = NULL) {
@@ -1905,10 +1919,10 @@ function _flag_compare_weight($flag1, $flag2) {
 /**
  * Retrieve a list of flags defined by modules.
  *
- * @param $include_disabled
+ * @param bool $include_disabled
  *   (optional) Unless specified, only enabled flags will be returned.
  *
- * @return
+ * @return array
  *   An array of flag prototypes, not usable for flagging. Use flag_get_flags()
  *   if needing to perform a flagging with any enabled flag.
  */
@@ -1985,20 +1999,20 @@ function flag_get_flag_flagging_data($flag_name) {
  * This is because this queries the {flagging} table, which only has its record
  * deleted at the very end of the unflagging process.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The type of entity that will be retrieved. Usually 'node'.
- * @param $entity_id
+ * @param int|null $entity_id
  *   (optional) The entity ID to check for flagging. If none given, all
  *   entities flagged by this user will be returned.
- * @param $uid
+ * @param int|null $uid
  *   (optional) The user ID whose flags we're checking. If none given, the
  *   current user will be used.
- * @param $sid
+ * @param int|null $sid
  *   (optional) The user SID (provided by Session API) whose flags we're
  *   checking. If none given, the current user will be used. The SID is 0 for
  *   logged in users.
  *
- * @return
+ * @return array
  *   If returning a single item's flags (that is, when $entity_id isn't NULL),
  *   an array of the structure
  *   [flag_name] => (

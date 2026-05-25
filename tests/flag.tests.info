@@ -58,3 +58,27 @@ description = Invocation of flag and entity hooks and rules during flagging and 
 group = Flag
 file = flag.test
 
+[FlagCommentOptimizationTestCase]
+name = Comment view optimization
+description = Tests that loading of flagging records when viewing all comments on a node works correctly.
+group = Flag
+file = flag.test
+
+[FlagFloodControlApiTestCase]
+name = Flood control API
+description = Tests flood_control_access(), access(), and flood event registration on flags.
+group = Flag
+file = flag.test
+
+[FlagFloodControlAdminTestCase]
+name = Flood control admin UI
+description = Tests that flood control settings appear in and are saved via the flag admin form.
+group = Flag
+file = flag.test
+
+[FlagFloodControlLinkTestCase]
+name = Flood control link behavior
+description = Tests that the flag link is hidden once the flood limit is reached.
+group = Flag
+file = flag.test
+

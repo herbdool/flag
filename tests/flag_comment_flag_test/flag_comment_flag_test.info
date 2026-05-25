@@ -1,0 +1,8 @@
+name = Flag Comment Flag Test
+description = Test module for comment flags.
+backdrop = 1.x
+type = module
+hidden = TRUE
+
+dependencies[] = flag
+dependencies[] = comment
