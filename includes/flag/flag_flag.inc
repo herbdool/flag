@@ -696,15 +696,15 @@ class flag_flag {
   /**
    * Flags, or unflags, an item.
    *
-   * @param $action
+   * @param string $action
    *   Either 'flag' or 'unflag'.
-   * @param $entity_id
+   * @param int $entity_id
    *   The ID of the item to flag or unflag.
-   * @param $account
+   * @param User $account
    *   The user on whose behalf to flag. Leave empty for the current user.
-   * @param $skip_permission_check
+   * @param bool $skip_permission_check
    *   Flag the item even if the $account user don't have permission to do so.
-   * @param $flagging
+   * @param Flagging $flagging
    *   (optional) This method works in tandem with Backdrop's Field subsystem.
    *   Pass in a Flagging entity if you want operate on it as well. This may be
    *   used either of the following cases:
@@ -817,11 +817,11 @@ class flag_flag {
   /**
    * Create a new Flagging to flag an entity.
    *
-   * @param $flagging
+   * @param Flagging $flagging
    *  The flagging entity that is to be saved.
-   * @param $entity_id
+   * @param int $entity_id
    *  The entity ID of entity being flagged.
-   * @param $account
+   * @param User $account
    *  The account performing the flagging.
    */
   private function flagging_insert($flagging, $entity_id, $account) {
@@ -876,11 +876,11 @@ class flag_flag {
   /**
    * Update a Flagging.
    *
-   * @param $flagging
+   * @param Flagging $flagging
    *  The flagging entity that is being updated.
-   * @param $entity_id
+   * @param int $entity_id
    *  The entity ID of entity the flagging is on.
-   * @param $account
+   * @param User $account
    *  The account performing the action.
    */
   private function flagging_update($flagging, $entity_id, $account) {
@@ -909,11 +909,11 @@ class flag_flag {
   /**
    * Unflag an entity by deleting a Flagging.
    *
-   * @param $flagging
+   * @param Flagging $flagging
    *  The flagging entity that is to be removed.
-   * @param $entity_id
+   * @param int $entity_id
    *  The entity ID of entity being unflagged.
-   * @param $account
+   * @param User $account
    *  The account performing the unflagging.
    */
   private function flagging_delete($flagging, $entity_id, $account) {
@@ -962,13 +962,13 @@ class flag_flag {
   /**
    * Invoke a Rules event in reaction to a flagging or unflagging.
    *
-   * @param $action
+   * @param string $action
    *   Either 'flag' or 'unflag'.
-   * @param $flagging
+   * @param Flagging $flagging
    *  The flagging entity that is either newly created or about to be deleted.
-   * @param $entity_id
+   * @param int $entity_id
    *  The entity ID of entity being flagged or unflagged.
-   * @param $account
+   * @param User $account
    *  The account performing the action.
    */
   protected function invoke_rules_event($action, $flagging, $entity_id, $account) {
@@ -1084,7 +1084,7 @@ class flag_flag {
   /**
    * Increases the flag count for an object and clears the static counts cache.
    *
-   * @param $entity_id
+   * @param int $entity_id
    *   For which item should the count be increased.
    * @param $number
    *   The amount of counts to increasing. Defaults to 1.
@@ -1117,7 +1117,7 @@ class flag_flag {
   /**
    * Decreases the flag count for an object and clears the static counts cache.
    *
-   * @param $entity_id
+   * @param int $entity_id
    *   For which item should the count be descreased.
    * @param $number
    *   The amount of counts to decrease. Defaults to 1.
@@ -1208,7 +1208,7 @@ class flag_flag {
    *
    * @param $label
    *   The label to get, e.g. 'title', 'flag_short', 'unflag_short', etc.
-   * @param $entity_id
+   * @param int $entity_id
    *   The ID in whose context to interpret tokens. If not given, only global
    *   tokens will be substituted.
    *
@@ -1538,9 +1538,9 @@ class flag_flag {
    * This is a wrapper around theme('flag') that channels the call to the right
    * template file.
    *
-   * @param $action
+   * @param string $action
    *  The action the link is about to carry out, either "flag" or "unflag".
-   * @param $entity_id
+   * @param int $entity_id
    *  The ID of the object to flag.
    * @param $variables = array()
    *  An array of further variables to pass to theme('flag'). For the full list
