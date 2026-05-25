@@ -304,9 +304,9 @@ function flag_admin_menu_map() {
 /**
  * Menu loader for '%flag' arguments.
  *
- * @param $flag_name
+ * @param string $flag_name
  *   The machine name of the flag.
- * @param $include_disabled
+ * @param bool $include_disabled
  *   (optional) Whether to return a disabled flag too. Normally only enabled
  *   flags are returned. Some menu items operate on disabled flags and in this
  *   case you need to turn on this switch by doing:
@@ -315,7 +315,7 @@ function flag_admin_menu_map() {
  *   @endcode
  *   in your hook_menu().
  *
- * @return
+ * @return flag_flag|false
  *   Either the flag object, or FALSE if none was found.
  */
 function flag_load($flag_name, $include_disabled = FALSE) {
@@ -337,6 +337,8 @@ function flag_load($flag_name, $include_disabled = FALSE) {
 
 /**
  * Menu title callback.
+ *
+ * @param flag_flag $flag
  */
 function _flag_menu_title($flag) {
   // The following conditional it to handle a D7 bug (@todo: link).
@@ -504,7 +506,7 @@ function flag_fetch_definition($entity_type = NULL) {
 /**
  * Returns all flag types defined on the system.
  *
- * @return
+ * @return array
  *   An array of flag type names.
  */
 function flag_get_types() {
@@ -525,8 +527,8 @@ function flag_get_types() {
  *  The entity type to create a flag handler for. This may be FALSE if the
  *  entity type property could not be found in the flag configuration data.
  *
- * @return object
- *  A flag handler object. This may be the special class flag_broken is there is
+ * @return flag_flag
+ *  A flag handler object. This may be the special class flag_broken if there is
  *  a problem with the flag.
  */
 function flag_create_handler($entity_type) {

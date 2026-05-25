@@ -129,6 +129,10 @@ class flag_flag {
   /**
    * Another factory method. Returns a new, "empty" flag; e.g., one suitable for
    * the "Add new flag" page.
+   *
+   * @param string $entity_type
+   *
+   * @return flag_flag
    */
   static function factory_by_entity_type($entity_type) {
     return flag_create_handler($entity_type);
@@ -215,6 +219,8 @@ class flag_flag {
 
   /**
    * Update the flag with settings entered in a form.
+   *
+   * @param array $form_values
    */
   function form_input($form_values) {
     // Load the form fields indiscriminately unto the flag (we don't care about
@@ -231,7 +237,7 @@ class flag_flag {
   /**
    * Validates this flag's options.
    *
-   * @return
+   * @return array
    *   A list of errors encountered while validating this flag's options.
    */
   function validate() {
@@ -273,6 +279,8 @@ class flag_flag {
 
   /**
    * Validates that the current flag's access settings are valid.
+   *
+   * @return array
    */
   function validate_access() {
     $errors = array();
@@ -306,6 +314,11 @@ class flag_flag {
 
   /**
    * Fetches, possibly from some cache, an entity this flag works with.
+   *
+   * @param int $entity_id
+   * @param object|null $object_to_remember
+   *
+   * @return array
    */
   function fetch_entity($entity_id, $object_to_remember = NULL) {
     static $cache = array();
@@ -323,6 +336,10 @@ class flag_flag {
    * Loads an entity this flag works with.
    * Derived classes must implement this.
    *
+   * @param int $entity_id
+   *
+   * @return null
+   *
    * @abstract
    * @private
    * @static
@@ -339,9 +356,9 @@ class flag_flag {
    * an object that hasn't yet been saved to the database. Subsequent calls to
    * fetch_entity() return the remembered object.
    *
-   * @param $entity_id
+   * @param int $entity_id
    *  The ID of the object to cache.
-   * @param $object
+   * @param object $object
    *  The object to cache.
    */
   function remember_entity($entity_id, $object) {
@@ -358,6 +375,10 @@ class flag_flag {
    *
    * Derived classes must implement this.
    *
+   * @param EntityInterface $entity
+   *
+   * @return false
+   *
    * @abstract
    */
   function applies_to_entity($entity) {
@@ -370,6 +391,10 @@ class flag_flag {
    * This is a convenience method that simply loads the object and calls
    * applies_to_entity(). If you already have the object, don't call
    * this function: call applies_to_entity() directly.
+   *
+   * @param int $entity_id
+   *
+   * @return bool
    */
   function applies_to_entity_id($entity_id) {
     return $this->applies_to_entity($this->fetch_entity($entity_id));
@@ -378,7 +403,7 @@ class flag_flag {
   /**
    * Provides permissions for this flag.
    *
-   * @return
+   * @return array
    *  An array of permissions for hook_permission().
    */
   function get_permissions() {
@@ -399,13 +424,13 @@ class flag_flag {
   /**
    * Determines whether the user has the permission to use this flag.
    *
-   * @param $action
+   * @param string $action
    *   (optional) The action to test, either "flag" or "unflag". If none given,
    *   "flag" will be tested, which is the minimum permission to use a flag.
-   * @param $account
+   * @param User|null $account
    *   (optional) The user object. If none given, the current user will be used.
    *
-   * @return
+   * @return bool
    *   Boolean TRUE if the user is allowed to flag/unflag. FALSE otherwise.
    *
    * @see flag_permission()
@@ -430,16 +455,16 @@ class flag_flag {
    * This method typically should not be overridden by child classes. Instead
    * they should implement type_access(), which is called by this method.
    *
-   * @param $entity_id
+   * @param int $entity_id
    *   The entity ID to flag/unflag.
-   * @param $action
+   * @param string $action
    *   The action to test. Either 'flag' or 'unflag'. Leave NULL to determine
    *   by flag status.
-   * @param $account
+   * @param User|null $account
    *   The user on whose behalf to test the flagging action. Leave NULL for the
    *   current user.
    *
-   * @return
+   * @return bool
    *   Boolean TRUE if the user is allowed to flag/unflag the given entity.
    *   FALSE otherwise.
    */
@@ -524,14 +549,14 @@ class flag_flag {
    * they should implement type_access_multiple(), which is called by this
    * method.
    *
-   * @param $entity_ids
+   * @param int[] $entity_ids
    *   The array of entity IDs to check. The keys are the entity IDs, the
    *   values are the actions to test: either 'flag' or 'unflag'.
-   * @param $account
+   * @param User|null $account
    *   (optional) The account for which the actions will be compared against.
    *   If left empty, the current user will be used.
    *
-   * @return
+   * @return array
    *   An array whose keys are the object IDs and values are booleans indicating
    *   access.
    *
@@ -574,7 +599,7 @@ class flag_flag {
    *
    * @abstract
    *
-   * @return
+   * @return false|null
    *  FALSE if access should be denied, or NULL if there is no restriction to
    *  be made. This should NOT return TRUE.
    */
@@ -587,7 +612,7 @@ class flag_flag {
    *
    * @abstract
    *
-   * @return
+   * @return array
    *  An array keyed by entity ids, whose values represent the access to the
    *  corresponding entity. The access value may be FALSE if access should be
    *  denied, or NULL (or not set) if there is no restriction to  be made. It
@@ -605,6 +630,10 @@ class flag_flag {
    * Given an entity, returns its ID.
    * Derived classes must implement this.
    *
+   * @param EntityInterface $entity
+   *
+   * @return null
+   *
    * @abstract
    */
   function get_entity_id($entity) {
@@ -615,13 +644,13 @@ class flag_flag {
    * Utility function: Checks whether a flag applies to a certain type, and
    * possibly subtype, of entity.
    *
-   * @param $entity_type
+   * @param string $entity_type
    *   The type of entity being checked, such as "node".
-   * @param $content_subtype
+   * @param string|null $content_subtype
    *   The subtype being checked. For entities this will be the bundle name (the
    *   node type in the case of nodes).
    *
-   * @return
+   * @return bool
    *   TRUE if the flag is enabled for this type and subtype.
    */
   function access_entity_enabled($entity_type, $content_subtype = NULL) {
@@ -643,10 +672,10 @@ class flag_flag {
    *
    * Derived classes are likely to implement this.
    *
-   * @param $view_mode
+   * @param string $view_mode
    *   The view mode of the entity being displayed.
    *
-   * @return
+   * @return bool
    *   A boolean indicating whether the flag link is to be shown in entity
    *   links.
    */
@@ -656,6 +685,8 @@ class flag_flag {
 
   /**
    * Returns TRUE if this flag requires anonymous user cookies.
+   *
+   * @return bool
    */
   function uses_anonymous_cookies() {
     global $user;
