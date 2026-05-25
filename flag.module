@@ -384,7 +384,7 @@ function flag_form_field_ui_field_overview_form_alter(&$form, &$form_state) {
     // Case 2: the current link type shows the form for creation of the
     // flagging, but it not the flagging form. Tell the user they can't edit
     // existing flagging fields.
-    $output .= t("Field values may be edited when flaggings are created because this flag's link type shows a form for the flagging. However, to edit field values on existing flaggings, you will need to set your flag to use the <em>Flagging form</em> link type. This is provided by the <em><a href='!flagging-form-url'>Flagging Form</a></em> module.", array(
+    $output .= t("Field values may be edited when flaggings are created because this flag's link type shows a form for the flagging. However, to edit field values on existing flaggings, you will need to set your flag to use the <em>Flagging form</em> link type. This is provided by the <em><a href='!flagging-form-url'>Flagging Form</a></em> module  (not yet available for Backdrop).", array(
       '!flagging-form-url' => 'http://drupal.org/project/flagging_form',
     ));
     if (!module_exists('flagging_form')) {
