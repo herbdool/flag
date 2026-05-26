@@ -450,6 +450,7 @@ function flag_form_field_ui_field_overview_form_alter(&$form, &$form_state) {
 function flag_action_info() {
   $flags = flag_get_flags();
   $index = 0;
+  $info = array();
   foreach ($flags as $flag) {
     $info["flag_flag_{$flag->name}_{$flag->entity_type}_action"] = array(
       'label' => $flag->get_label('flag_short'),
