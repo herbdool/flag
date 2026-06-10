@@ -162,7 +162,7 @@ function flag_requirements($phase) {
 
         // Check to see if the entities are translatable.
         $entity_info = entity_get_info($flag->entity_type);
-        if ($entity_info['translation']['locale']) {
+        if (!empty($entity_info['translation']['locale'])) {
 
           // Check to see if the enity bundles are translatable.
           switch ($flag->entity_type) {
