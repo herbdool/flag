@@ -46,10 +46,10 @@ Backdrop.behaviors.flagRoles.attach = function(context) {
 Backdrop.behaviors.flagSummary = {};
 
 Backdrop.behaviors.flagSummary.attach = function (context) {
-  $('fieldset.flag-fieldset', context).backdropSetSummary(function(context) {
+  $('#edit-flags', context).backdropSetSummary(function (context) {
     var flags = [];
-    $('input:checkbox:checked', context).each(function() {
-      flags.push(this.title);
+    $('input:checked', context).next('label').each(function () {
+      flags.push(Backdrop.checkPlain($(this).text()));
     });
 
     if (flags.length) {

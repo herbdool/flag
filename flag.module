@@ -692,6 +692,20 @@ function flag_field_extra_fields() {
 function flag_form_node_type_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $flags = flag_get_flags('node', $form['#node_type']->type, $user);
+
+  $form['flags'] = array(
+    '#title' => t('Flags'),
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#weight' => 10,
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'flag') . '/js/flag-admin.js'),
+    ),
+  );
+
+  $config = config('flag.settings');
   foreach ($flags as $flag) {
     if ($flag->show_on_form) {
       // To be able to process node tokens in flag labels, we create a fake
@@ -703,17 +717,17 @@ function flag_form_node_type_form_alter(&$form, &$form_state, $form_id) {
         'title' => '',
       ));
       $var = 'flag_' . $flag->name . '_default';
-      $form['workflow']['flag'][$var] = array(
+      $form['flags']['flag'][$var] = array(
         '#type' => 'checkbox',
         '#title' => $flag->get_label('flag_short', 'fake'),
-        '#default_value' => config_get('flag.settings', $var . '_' . $form['#node_type']->type),
+        '#default_value' => $config->get($var . '_' . $form['#node_type']->type),
         '#return_value' => 1,
       );
     }
   }
 
-  if (isset($form['workflow']['flag'])) {
-    $form['workflow']['flag'] += array(
+  if (isset($form['flags']['flag'])) {
+    $form['flags']['flag'] += array(
       '#type' => 'item',
       '#title' => t('Default flags'),
       '#description' => t('Above are the <a href="@flag-url">flags</a> you elected to show on the node editing form. You may specify their initial state here.', array('@flag-url' => url(FLAG_ADMIN_PATH))),
@@ -722,6 +736,27 @@ function flag_form_node_type_form_alter(&$form, &$form_state, $form_id) {
       '#suffix' => '</div>',
     );
   }
+  else {
+    $form['flags']['flag'] = array(
+      '#type' => 'item',
+      '#title' => t('No flags'),
+      '#description' => t('Currently there are no flags enabled for this content type. Flags can be configured on the <a href="@flag-url">flags admin</a> page.', array('@flag-url' => url(FLAG_ADMIN_PATH))),
+    );
+  }
+  $form['#submit'][] = 'flag_form_node_type_form_submit';
+}
+
+/**
+ * Submit handler for node type form.
+ */
+function flag_form_node_type_form_submit(&$form, $form_state) {
+  $config = config('flag.settings');
+  foreach ($form_state['values'] as $key => $value) {
+    if (strpos($key, 'flag_') === 0) {
+      $config->set($key . '_' . $form['#node_type']->type, (int) $value);
+    }
+  }
+  $config->save();
 }
 
 /**
@@ -751,6 +786,7 @@ function flag_field_attach_form($entity_type, $entity, &$form, &$form_state, $la
   // Filter out flags which need to be included on the node form.
   $flags_in_form = 0;
   $flags_visible = 0;
+  $config = config('flag.settings');
   foreach ($flags as $flag) {
     if (!$flag->show_on_form) {
       continue;
@@ -767,7 +803,7 @@ function flag_field_attach_form($entity_type, $entity, &$form, &$form_state, $la
       // Apply the per-bundle defaults for nodes.
       if ($entity_type == 'node') {
         $node_type = $entity->type;
-        $flag_status = config_get('flag.settings', 'flag_' . $flag->name . '_default_' . $node_type);
+        $flag_status = $config->get('flag_' . $flag->name . '_default_' . $node_type);
       }
 
       // For a new, unsaved entity, make a dummy entity ID so that the flag
