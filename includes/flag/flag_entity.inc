@@ -33,6 +33,8 @@ class flag_entity extends flag_flag {
 
   /**
    * Options form extras for the generic entity flag.
+   *
+   * @param array $form
    */
   function options_form(&$form) {
     $bundles = array();
@@ -139,7 +141,7 @@ class flag_entity extends flag_flag {
   /**
    * Provides permissions for this flag.
    *
-   * @return
+   * @return array
    *  An array of permissions for hook_permission().
    */
   function get_permissions() {
@@ -238,6 +240,10 @@ class flag_entity extends flag_flag {
 
   /**
    * Returns a 'flag action' object.
+   *
+   * @param int $entity_id
+   *
+   * @return object
    */
   function get_flag_action($entity_id) {
     $flag_action = parent::get_flag_action($entity_id);
@@ -249,6 +255,8 @@ class flag_entity extends flag_flag {
 
   /**
    * Returns objects the action may possible need.
+   *
+   * @param int $entity_id
    */
   function get_relevant_action_objects($entity_id) {
     return array(

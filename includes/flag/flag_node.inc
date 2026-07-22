@@ -90,7 +90,7 @@ class flag_node extends flag_entity {
    * @param int $entity_id
    *   The nid for the content.
    *
-   * @return
+   * @return int
    *   The tnid if available, the nid otherwise.
    */
   function get_translation_id($entity_id) {
